@@ -19,7 +19,7 @@ import warnings
 st.set_page_config(page_title="Credit Risk Analysis", layout="wide")
 
 # Inisiasi variabel untuk memuat model yang sudah dilatih Gunakan Pickel untuk load model(JANGAN DI HAPUS, ISI DIBAWAH INI)
-xgboost = pickle.load(open('xgb_model.pkl', 'rb'))
+xgboost = pickle.load(open('xgbmodel.pkl', 'rb'))
 kmeans = pickle.load(open('k_means_model.pkl', 'rb'))
 
 # Buat Fungsi yang dapat mengeluarkan hasil prediksi dari model berdasarkan input dari user
