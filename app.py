@@ -1287,9 +1287,228 @@ def main():
         """
         st.markdown(html_temp, unsafe_allow_html=True)
 
-        tab1, tab2 = st.tabs(["Classification Modelling & Evaluation 🤖", "Clustering Modelling & Evaluation 🎈"])
+        tab1, tab2, tab3, tab4 = st.tabs(["Overview XGBoost Classfier 💻", "Classification Modelling & Evaluation 🤖", "Overview K-Means Clustering 💻", "Clustering Modelling & Evaluation 🎈"])
 
         with tab1:
+            st.markdown("""
+                <style>
+                /* General Styling */
+                .title {
+                    text-align: center;
+                    font-size: 38px;
+                    font-weight: bold;
+                    color: #FF6F61;
+                    margin-bottom: 20px;
+                }
+                .subtitle {
+                    text-align: center;
+                    font-size: 24px;
+                    color: #555555;
+                    margin-top: -15px;
+                    margin-bottom: 40px;
+                }
+                .section-header {
+                    font-size: 25px;
+                    font-weight: bold;
+                    color: #FF6F61;
+                    margin-top: 20px;
+                    margin-bottom: 10px;
+                }
+                .section-header2 {
+                    font-size: 20px;
+                    font-weight: bold;
+                    color: #FF6F61;
+                    margin-top: 20px;
+                    margin-bottom: 10px;
+                }
+                .info-box {
+                    background-color: #F9F9F9;
+                    color: black;
+                    padding: 15px;
+                    border-left: 7px solid #FF6F61;
+                    border-radius: 5px;
+                    margin-bottom: 20px;
+                    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+                }
+                .highlight {
+                    font-weight: bold;
+                    color: #FF6F61;
+                }
+                .dataframe-container {
+                    margin-top: 10px;
+                    margin-bottom: 20px;
+                    text-align: center;
+                }
+                </style>
+            """, unsafe_allow_html=True)
+
+            st.write("<br>", unsafe_allow_html=True)
+            st.markdown('<div class="title">🤖 XGBoost Classifier 🤖</div>', unsafe_allow_html=True)
+            st.markdown('<div class="subtitle">"Classification - Supervised Learning"</div>', unsafe_allow_html=True)
+
+            st.markdown("---", unsafe_allow_html=True)
+
+            # Splitting Data
+            st.markdown('<div class="section-header">✂️ Splitting Data</div>', unsafe_allow_html=True)
+            st.markdown("""
+                <div class="info-box">
+                    <p>Langkah pertama dalam proses modelling adalah membagi dataset menjadi data latih dan data uji. Pembagian dilakukan menggunakan <strong>train_test_split</strong> dari <em>sklearn.model_selection</em> dengan rasio 80% untuk data latih dan 20% untuk data uji.</p>
+                    <ul>
+                        <li><strong>Data Latih:</strong> 19,586 (kelas 0) dan 19,503 (kelas 1).</li>
+                        <li><strong>Data Uji:</strong> 4,928 (kelas 1) dan 4,845 (kelas 0).</li>
+                    </ul>
+                    <br>
+                    <pre>
+
+                    from sklearn.model_selection import train_test_split
+
+                    X = df_balanced.drop(columns=['loan_status'])
+                    y = df_balanced['loan_status']
+                    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+                    print("Distribusi data latih:", y_train.value_counts())
+                    print("Distribusi data test:", y_test.value_counts())
+                    
+                </div>
+            """, unsafe_allow_html=True)
+
+            st.markdown("---", unsafe_allow_html=True)
+
+            # Build XGBoost Classifier
+            st.markdown('<div class="section-header">🏗️ Build XGBoost Classifier</div>', unsafe_allow_html=True)
+            st.markdown("""
+                <div class="info-box">
+                    <p>XGBoost (Extreme Gradient Boosting) adalah metode machine learning berbasis ensemble yang menggabungkan prediksi dari beberapa model lemah untuk menghasilkan prediksi yang lebih kuat dan akurat.
+                    Beberapa alasan utama mengapa XGBoost dipilih dalam proyek ini antara lain:
+                    <ul>
+                        <li><b>Kinerja Tinggi:</b> XGBoost sangat efektif dalam menangani tugas klasifikasi dan regresi, bahkan pada dataset yang besar. Algoritma ini sering menunjukkan hasil unggul di banyak kompetisi.</li>
+                        <li><b>Kemampuan Menangani Missing Values:</b> XGBoost dapat menangani missing values dengan baik tanpa memerlukan banyak preprocessing.</li>
+                        <li><b>Paralelisasi:</b> Algoritma ini mendukung pemrosesan paralel, yang memungkinkan pelatihan lebih cepat meskipun dataset yang digunakan besar.</li>
+                        <li><b>Fleksibilitas Tuning:</b> XGBoost memungkinkan penyesuaian berbagai parameter, seperti learning rate, max depth, dan n_estimators, untuk mengoptimalkan kinerja model.</li>
+                    </ul>
+                    Langkah pertama dalam membangun model XGBoost adalah menginisialisasi XGBClassifier dan melatihnya menggunakan data latih (X_train, y_train). Setelah pelatihan, model digunakan untuk memprediksi status pinjaman pada data uji (X_test).</p>
+                    <br>
+                    <pre>
+
+                    from xgboost import XGBClassifier
+
+                    # Inisialisasi model XGBoost
+                    xgb_model = XGBClassifier(random_state=42)
+
+                    # Latih model dengan data training
+                    xgb_model.fit(X_train, y_train)
+
+                    # Prediksi pada data test
+                    y_pred = xgb_model.predict(X_test)
+
+                </div>
+            """, unsafe_allow_html=True)
+
+            st.markdown("---", unsafe_allow_html=True)
+
+            # Evaluate Before Tuning
+            st.markdown('<div class="section-header">📈 Evaluate the XGBoost Classifier Model (Before Tuning)</div>', unsafe_allow_html=True)
+            st.markdown("""
+                <div class="info-box">
+                    <p>Setelah model dilatih, kita melakukan evaluasi untuk mengukur kinerjanya menggunakan beberapa metrik yang umum digunakan dalam klasifikasi:</p>
+                    <ol>
+                        <li><strong>Akurasi Model:</strong> Akurasi adalah metrik yang menunjukkan seberapa banyak prediksi yang benar dibandingkan dengan total prediksi. Pada tahap ini, model XGBoost menunjukkan akurasi sebesar 96%.</li>
+                        <li><strong>Confusion Matrix:</strong> Confusion matrix memberikan gambaran lebih detail mengenai prediksi model dengan membandingkan nilai prediksi dengan nilai aktual. Pada output ini, kita mendapatkan nilai-nilai berikut:
+                            <ul>
+                                <li>True Negative (TN): 4814 (Prediksi benar bahwa pinjaman tidak gagal bayar)</li>
+                                <li>False Positive (FP): 31 (Prediksi salah bahwa pinjaman gagal bayar, padahal tidak)</li>
+                                <li>False Negative (FN): 383 (Prediksi salah bahwa pinjaman tidak gagal bayar, padahal gagal bayar)</li>
+                                <li>True Positive (TP): 4545 (Prediksi benar bahwa pinjaman gagal bayar)</li>
+                            </ul>
+                        </li>
+                        <li><strong>Classification Report:</strong> Classification report memberikan metrik lebih mendalam, termasuk precision, recall, f1-score, dan support untuk setiap kelas. Model ini menunjukkan hasil yang sangat baik pada kedua kelas (gagal bayar dan tidak gagal bayar), dengan nilai precision, recall, dan f1-score yang tinggi.</li>
+                        <li><strong>ROC Curve dan AUC:</strong> ROC curve menilai trade-off antara true positive rate (recall) dan false positive rate. Dengan nilai AUC sebesar 0.9841, model ini menunjukkan performa yang sangat baik dalam memisahkan kedua kelas (gagal bayar dan tidak gagal bayar).</li>
+                    </ol>
+                </div>
+            """, unsafe_allow_html=True)
+
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.image(Image.open('outputbeforetunexgboostconf.png'), caption="Confusion Matrix Output")
+            with col2:
+                st.image(Image.open('outputbeforetunexgboostroc.png'), caption="ROC Curve Output")
+            with col3:
+                st.image(Image.open('outputbeforetunexgboostreport.png'), caption="Classification Report Output")
+            st.markdown("---", unsafe_allow_html=True)
+
+            # Hyperparameter Tuning
+            st.markdown('<div class="section-header">⚙️ Hyperparameter Tuning</div>', unsafe_allow_html=True)
+            st.markdown("""
+                <div class="info-box">
+                    <p>Dalam tahap ini, kita melakukan <strong>Hyperparameter Tuning</strong> untuk meningkatkan kinerja model XGBoost. Proses tuning ini dilakukan dengan menggunakan <strong>GridSearchCV</strong>, yang bertujuan untuk mencari kombinasi parameter terbaik dengan menguji berbagai nilai parameter yang telah ditentukan.</p>
+                    <p>Beberapa hyperparameter yang diuji untuk model XGBoost adalah sebagai berikut:</p>
+                    <ul>
+                        <li><strong>learning_rate:</strong> Menentukan kecepatan model dalam belajar dari setiap iterasi. Nilai yang diuji adalah 0.01, 0.05, 0.1, dan 0.2.</li>
+                        <li><strong>max_depth:</strong> Kedalaman maksimum dari setiap pohon keputusan dalam model. Nilai yang diuji adalah 3, 5, dan 7.</li>
+                        <li><strong>n_estimators:</strong> Jumlah pohon yang akan dibangun oleh model. Nilai yang diuji adalah 50, 100, 150, 200, 300, dan 500.</li>
+                        <li><strong>subsample:</strong> Fraksi sampel yang digunakan untuk membangun setiap pohon keputusan. Nilai yang diuji adalah 0.8 dan 1.0.</li>
+                        <li><strong>colsample_bytree:</strong> Fraksi fitur yang dipilih secara acak untuk membangun setiap pohon keputusan. Nilai yang diuji adalah 0.8 dan 1.0.</li>
+                    </ul>
+                    <p>Setelah mendefinisikan ruang pencarian parameter (parameter grid), kami menggunakan <strong>GridSearchCV</strong> untuk menguji semua kombinasi parameter dan melakukan validasi silang (cross-validation). GridSearchCV akan memberikan hasil yang terbaik berdasarkan skor <strong>ROC AUC</strong>, yang digunakan untuk mengevaluasi performa model pada data latih.</p>
+                    <p>Hasil terbaik yang diperoleh dari GridSearchCV menunjukkan bahwa skor <strong>ROC AUC</strong> setelah tuning adalah <strong>0.9558</strong>, yang mengindikasikan bahwa kombinasi parameter ini meningkatkan kinerja model dibandingkan dengan model sebelum tuning.</p>
+                    <br>
+                    <pre>
+
+                    param_grid = {
+                        'learning_rate': [0.01, 0.05, 0.1, 0.2], 
+                        'max_depth': [3, 5, 7], 
+                        'n_estimators': [50, 100, 150, 200, 300, 500],
+                        'subsample': [0.8, 1.0], 
+                        'colsample_bytree': [0.8, 1.0]}
+
+                    from sklearn.model_selection import GridSearchCV
+
+                    xgb_model = XGBClassifier(random_state=42, use_label_encoder=False, eval_metric='logloss')
+                    grid_search = GridSearchCV(estimator=xgb_model, param_grid=param_grid, cv=5, scoring='accuracy', n_jobs=-1)
+
+                    grid_search.fit(X_train, y_train)
+                    print("Best parameters:", grid_search.best_params_)
+                    print("Best score:", grid_search.best_score_)
+
+                </div>
+            """, unsafe_allow_html=True)
+            st.image(Image.open('outputhyperxgboost.png'), caption="Hyperparameter Output")
+
+
+            st.markdown("---", unsafe_allow_html=True)
+
+            # Evaluate After Tuning
+            st.markdown('<div class="section-header">📈 Evaluate the XGBoost Classifier Model (After Tuning)</div>', unsafe_allow_html=True)
+            st.markdown("""
+                <div class="info-box">
+                    <p>Setelah melakukan hyperparameter tuning pada model XGBoost, evaluasi dilakukan kembali untuk mengukur kinerjanya dan membandingkannya dengan model sebelum tuning. Beberapa metrik yang digunakan untuk evaluasi antara lain:</p>
+                    <ol>
+                        <li><strong>Akurasi Model:</strong> Akurasi menunjukkan seberapa banyak prediksi yang benar dibandingkan dengan total prediksi. Setelah dilakukan hyperparameter tuning, model XGBoost menunjukkan akurasi sebesar 96%, yang berarti model berhasil memprediksi dengan benar 96% dari total data uji.</li>
+                        <li><strong>Confusion Matrix:</strong> Confusion matrix memberikan gambaran lebih detail mengenai prediksi model dengan membandingkan nilai prediksi dengan nilai aktual. Setelah tuning, kita memperoleh nilai-nilai berikut:
+                            <ul>
+                                <li>True Negative (TN): 4789 (Prediksi benar bahwa pinjaman tidak gagal bayar)</li>
+                                <li>False Positive (FP): 56 (Prediksi salah bahwa pinjaman gagal bayar, padahal tidak)</li>
+                                <li>False Negative (FN): 362 (Prediksi salah bahwa pinjaman tidak gagal bayar, padahal gagal bayar)</li>
+                                <li>True Positive (TP): 4566 (Prediksi benar bahwa pinjaman gagal bayar)</li>
+                            </ul>
+                        </li>
+                        <li><strong>Classification Report:</strong> Classification report memberikan metrik yang lebih mendalam, termasuk precision, recall, f1-score, dan support untuk setiap kelas. Model ini menunjukkan hasil yang sangat baik dengan keseimbangan antara precision dan recall pada kedua kelas (gagal bayar dan tidak gagal bayar).</li>
+                        <li><strong>ROC Curve dan AUC:</strong> ROC curve menilai trade-off antara true positive rate (recall) dan false positive rate. Setelah tuning, skor AUC meningkat menjadi 0.9854, menunjukkan bahwa model memiliki kemampuan yang sangat baik dalam memisahkan kedua kelas.</li>
+                    </ol>
+                </div>
+            """, unsafe_allow_html=True)
+
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.image(Image.open('outputaftertunexgboostconf.png'), caption="Confusion Matrix Output (After Tuning)")
+            with col2:
+                st.image(Image.open('outputaftertunexgboostroc.png'), caption="ROC Curve Output (After Tuning)")
+            with col3:
+                st.image(Image.open('outputaftertunexgboostreport.png'), caption="Classification Report Output (After Tuning)")
+                
+            st.markdown("---", unsafe_allow_html=True)
+
+        with tab2:
             # Memanggil fungsi prepare_data untuk memproses data
             df_balanced = prepare_data_classification("credit_risk_dataset.csv")
 
@@ -1323,8 +1542,234 @@ def main():
             elif plot_option == "Confusion Matrix":
                 cm = confusion_matrix(y_test, y_pred)
                 plot_confusion_matrix(cm)
+        
+        with tab3:
+            st.markdown("""
+                <style>
+                /* General Styling */
+                .title {
+                    text-align: center;
+                    font-size: 38px;
+                    font-weight: bold;
+                    color: #FF6F61;
+                    margin-bottom: 20px;
+                }
+                .subtitle {
+                    text-align: center;
+                    font-size: 24px;
+                    color: #555555;
+                    margin-top: -15px;
+                    margin-bottom: 40px;
+                }
+                .section-header {
+                    font-size: 25px;
+                    font-weight: bold;
+                    color: #FF6F61;
+                    margin-top: 20px;
+                    margin-bottom: 10px;
+                }
+                .section-header2 {
+                    font-size: 20px;
+                    font-weight: bold;
+                    color: #FF6F61;
+                    margin-top: 20px;
+                    margin-bottom: 10px;
+                }
+                .info-box {
+                    background-color: #F9F9F9;
+                    color: black;
+                    padding: 15px;
+                    border-left: 7px solid #FF6F61;
+                    border-radius: 5px;
+                    margin-bottom: 20px;
+                    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+                }
+                .highlight {
+                    font-weight: bold;
+                    color: #FF6F61;
+                }
+                .dataframe-container {
+                    margin-top: 10px;
+                    margin-bottom: 20px;
+                    text-align: center;
+                }
+                </style>
+            """, unsafe_allow_html=True)
 
-        with tab2:
+            st.write("<br>", unsafe_allow_html=True)
+            st.markdown('<div class="title">🎈 K-Means 🎈</div>', unsafe_allow_html=True)
+            st.markdown('<div class="subtitle">"Clustering - Unsupervised Learning"</div>', unsafe_allow_html=True)
+
+            st.markdown("---", unsafe_allow_html=True)
+
+            # Build K-Means Model
+            st.markdown('<div class="section-header">🏗️ Build K-Means Clustering Model</div>', unsafe_allow_html=True)
+            st.markdown("""
+                <div class="info-box">
+                    <p>K-Means Clustering adalah algoritma unsupervised learning yang digunakan untuk mengelompokkan data tanpa label menjadi beberapa grup (clusters) berdasarkan kesamaan fitur dalam data. K-Means adalah salah satu metode clustering yang sangat populer karena kesederhanaannya dan kemampuannya untuk menangani data dalam jumlah besar dengan cepat.
+                    Beberapa alasan mengapa K-Means dipilih dalam proyek ini antara lain:
+                    <ul>
+                        <li><b>Sederhana dan Cepat:</b> K-Means memiliki implementasi yang sederhana dan relatif cepat dibandingkan dengan metode clustering lainnya. Algoritma ini menggunakan jarak Euclidean untuk mengelompokkan data.</li>
+                        <li><b>Kemampuan Mengelompokkan Data yang Terpisah dengan Baik:</b> K-Means bekerja optimal pada data yang terdistribusi dengan baik dan tidak tumpang tindih.</li>
+                        <li><b>Fleksibilitas dalam Menentukan Jumlah Cluster:</b> K-Means memungkinkan kita untuk menentukan jumlah cluster (K) yang diinginkan, sehingga algoritma ini dapat disesuaikan dengan berbagai kebutuhan analisis.</li>
+                        <li><b>Kesesuaian untuk Data Berdimensi Tinggi:</b> Meskipun berbasis pada jarak Euclidean, K-Means mampu menangani data dengan dimensi yang tinggi secara efisien.</li>
+                    </ul>
+                    Namun, K-Means juga memiliki beberapa keterbatasan, seperti:
+                    <ul>
+                        <li>Sensitif terhadap noise dan outlier, yang dapat mempengaruhi posisi centroid.</li>
+                        <li>Hasil clustering dapat bervariasi tergantung pada inisialisasi centroid awal, sehingga perlu dilakukan beberapa percobaan untuk mendapatkan hasil yang optimal.</li>
+                        <li>Tidak cocok untuk data yang saling tumpang tindih atau memiliki cluster yang tidak berbentuk bulat.</li>
+                    </ul>
+                    Langkah pertama dalam membangun model K-Means adalah menentukan jumlah cluster optimal menggunakan metode Elbow. Setelah itu, kita menerapkan K-Means untuk mengelompokkan data.</p>
+                    <br>
+                    <pre>
+                    
+                    from sklearn.cluster import KMeans
+
+                    # Metode Elbow untuk menentukan jumlah cluster optimal
+                    inertia = []
+                    k_values = range(1, 11)
+
+                    for k in k_values:
+                        kmeans = KMeans(n_clusters=k, random_state=42)
+                        kmeans.fit(pca_df)
+                        inertia.append(kmeans.inertia_)
+                    
+                    # Plot Elbow
+                    plt.figure(figsize=(8, 5))
+                    plt.plot(k_values, inertia, marker='o', linestyle='--')
+                    plt.title('Elbow Method for Optimal k')
+                    plt.xlabel('Number of Clusters (k)')
+                    plt.ylabel('Inertia')
+                    plt.grid()
+                    plt.show()
+                    
+                    kmeans = KMeans(n_clusters=4, random_state=42)
+                    kmeans.fit(pca_df)
+                    pca_df['Cluster'] = kmeans.labels_
+                    
+                </div>
+            """, unsafe_allow_html=True)
+            col1, col2 = st.columns(2)
+            with col1:
+                st.image(Image.open('outputelbowkmeans.png'), caption="Confusion Matrix Output (After Tuning)")
+            with col2:
+                st.image(Image.open('tabelkmeans.png'), caption="ROC Curve Output (After Tuning)", width=400)
+
+            st.markdown("---", unsafe_allow_html=True)
+
+            # Evaluate Before Tuning K-Means
+            st.markdown('<div class="section-header">📈 Evaluate the K-Means Model (Before Tuning)</div>', unsafe_allow_html=True)
+            st.markdown("""
+                <div class="info-box">
+                    <p>Sebelum melakukan hyperparameter tuning, kita melakukan evaluasi awal untuk mengukur kualitas clustering yang dihasilkan oleh model K-Means. Salah satu metrik utama yang digunakan adalah <strong>Silhouette Score</strong>, yang mengukur seberapa baik data dalam setiap cluster dibandingkan dengan data di cluster lain.</p>
+                    <p>Nilai Silhouette Score berkisar antara -1 hingga 1, dengan interpretasi sebagai berikut:</p>
+                    <ul>
+                        <li><strong>Nilai mendekati 1:</strong> Menunjukkan bahwa data dalam cluster dikelompokkan dengan baik.</li>
+                        <li><strong>Nilai mendekati 0:</strong> Menunjukkan bahwa data berada di perbatasan antara dua cluster.</li>
+                        <li><strong>Nilai negatif:</strong> Menunjukkan bahwa data mungkin salah dikelompokkan.</li>
+                    </ul>
+                    <p>Hasil evaluasi sebelum tuning menunjukkan bahwa nilai <strong>Silhouette Score</strong> untuk model K-Means adalah <strong>0.6157</strong>, yang mengindikasikan bahwa data dalam setiap cluster cukup mirip satu sama lain, namun masih ada potensi untuk meningkatkan pemisahan antar cluster.</p>
+                    <br>
+                    <pre>
+
+                    from sklearn.metrics import silhouette_score
+
+                    sil_score = silhouette_score(pca_df, kmeans.labels_)
+                    print(f'Silhouette Score: {sil_score}')
+                </div>
+            """, unsafe_allow_html=True)
+
+            st.markdown("---", unsafe_allow_html=True)
+
+            # Hyperparameter Tuning K-Means
+            st.markdown('<div class="section-header">⚙️ Hyperparameter Tuning K-Means</div>', unsafe_allow_html=True)
+            st.markdown("""
+                <div class="info-box">
+                    <p>Dalam tahap ini, kita melakukan <strong>Hyperparameter Tuning</strong> untuk meningkatkan kinerja model K-Means. Proses tuning ini dilakukan dengan menggunakan <strong>GridSearchCV</strong>, yang bertujuan untuk mencari kombinasi parameter terbaik dengan menguji berbagai nilai parameter yang telah ditentukan.</p>
+                    <p>Beberapa hyperparameter yang diuji untuk model K-Means adalah sebagai berikut:</p>
+                    <ul>
+                        <li><strong>n_clusters:</strong> Jumlah cluster yang akan diuji, yaitu 2, 3, 4, 5, dan 6.</li>
+                        <li><strong>init:</strong> Metode inisialisasi centroid yang diuji, yaitu 'k-means++' dan 'random'.</li>
+                        <li><strong>n_init:</strong> Jumlah inisialisasi yang diuji, yaitu 10 dan 20.</li>
+                        <li><strong>max_iter:</strong> Jumlah iterasi maksimum untuk konvergensi, yaitu 100, 300, 500, dan 1000.</li>
+                    </ul>
+                    <p>Setelah mendefinisikan ruang pencarian parameter (parameter grid), kami menggunakan <strong>GridSearchCV</strong> untuk menguji semua kombinasi parameter dan melakukan validasi silang (cross-validation). GridSearchCV akan memberikan hasil yang terbaik berdasarkan metrik <strong>Silhouette Score</strong>, yang digunakan untuk mengevaluasi kualitas clustering.</p>
+                    <p>Hasil terbaik yang diperoleh dari GridSearchCV menunjukkan bahwa parameter optimal untuk model K-Means adalah <strong>n_clusters=4, init='k-means++', n_init=10, max_iter=100</strong>, dengan Silhouette Score <strong>0.6157</strong>.</p>
+                    <br>
+                    <pre>
+
+                    from sklearn.model_selection import GridSearchCV
+
+                    param_grid = {
+                        'n_clusters': [2, 3, 4, 5, 6], 
+                        'init': ['k-means++', 'random'], 
+                        'n_init': [10, 20],
+                        'max_iter': [100, 300, 500, 1000] 
+                    }
+
+                    kmeans = KMeans(random_state=42)
+                    grid_search = GridSearchCV(estimator=kmeans, param_grid=param_grid)
+                    grid_search.fit(pca_df)
+
+                    best_score = -1
+                    best_params = None
+
+                    for params in grid_search.cv_results_['params']:
+                        model = KMeans(**params)
+                        cluster_labels = model.fit_predict(pca_df)
+                        score = silhouette_score((pca_df), cluster_labels)
+
+                        if score > best_score:
+                            best_score = score
+                            best_params = params
+
+                    print("Best Parameters: ", best_params)
+                    print("Best Silhouette Score: ", best_score)
+                        
+                </div>
+            """, unsafe_allow_html=True)
+
+            st.markdown("---", unsafe_allow_html=True)
+
+            # Evaluate K-Means Model (After Tuning)
+            st.markdown('<div class="section-header">📈 Evaluate the K-Means Model (After Tuning)</div>', unsafe_allow_html=True)
+            st.markdown("""
+                <div class="info-box">
+                    <p>Setelah melakukan hyperparameter tuning pada model K-Means, evaluasi dilakukan untuk mengukur kinerjanya dan membandingkannya dengan model sebelum tuning. Salah satu metrik utama yang digunakan untuk evaluasi adalah <strong>Silhouette Score</strong>, yang memberikan gambaran tentang seberapa baik setiap titik data terkelompok dalam cluster.</p>
+                    <p>Hasil evaluasi menunjukkan bahwa setelah tuning, model K-Means dengan parameter terbaik menghasilkan <strong>Silhouette Score: 0.6157</strong>, yang mengindikasikan kualitas clustering yang lebih baik dibandingkan dengan model sebelum tuning.</p>
+                    <p>Selain itu, distribusi cluster yang lebih terpisah dapat divisualisasikan dalam scatter plot berikut:</p>
+                    <br>
+                    <pre>
+                    
+                    best_model = KMeans(**best_params)
+                    best_model.fit(pca_df)
+                    
+                    pca_df['Cluster'] = best_model.labels_
+                    centroids = best_model.cluster_centers_
+                    
+                    # Plot hasil clustering
+                    plt.figure(figsize=(8, 6))
+
+                    # Scatter plot data berdasarkan label cluster
+                    plt.scatter(pca_df.iloc[:, 0], pca_df.iloc[:, 1], c=pca_df['Cluster'], cmap='viridis', s=50, alpha=0.6)
+
+                    # Menambahkan centroid pada plot
+                    plt.scatter(centroids[:, 0], centroids[:, 1], c='red', s=200, marker='X', label='Centroids')
+
+                    # Menambahkan label dan judul
+                    plt.title('Clustering Results with KMeans (PCA Components)')
+                    plt.xlabel('PCA Component 1')
+                    plt.ylabel('PCA Component 2')
+                    plt.legend()
+
+                    # Tampilkan plot
+                    plt.show()
+                </div>
+            """, unsafe_allow_html=True)
+            st.image(Image.open('outputcentroidcluster.png'), caption="Confusion Matrix Output (After Tuning)")
+
+        with tab4:
             df_clustering = prepare_data_clustering("data_outlier1.csv")
             sil_score = evaluate_model_clustering(df_clustering)
             st.markdown(
